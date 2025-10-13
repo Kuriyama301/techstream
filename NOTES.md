@@ -221,4 +221,69 @@ Total:       Article(9) + Source(10) + Category(11) = 30 ✅
 - RSS Parserの実装
 - 基本的なソース登録（Python、JavaScript、Go等）
 
+---
+
+### 2025-10-13（Phase 3-1: RSS収集機能実装）
+
+#### Phase 3-1完了 - RSS収集機能実装
+- **ブランチ**: feature/rss-collector で作業
+- **開発手法**: TDD（テスト駆動開発）
+
+#### 実装内容
+
+**rss-parserライブラリ導入**:
+- npm install rss-parser
+- RSSとAtom両方のフィードに対応
+- 自動で日付パース、TypeScript対応
+
+**RSSCollectorクラス**:
+- `fetchFromSource(sourceId)`: 指定ソースからRSS取得
+- `detectLanguage()`: URLから言語を自動検出
+- `calculateFreshness()`: 記事の新鮮さスコア計算
+- 重複記事チェック（link基準）
+- エラーハンドリング（failureCount記録）
+- テスト: 15件実装（ユニット + 統合テスト）
+
+**初期ソースデータ登録**:
+- seedSources.ts: 初期ソース登録スクリプト
+- 9件のRSSフィード登録
+  - Python: Python Insider, Real Python
+  - JavaScript: JavaScript Weekly, Node.js Blog
+  - Go: The Go Blog
+  - Rust: Rust Blog
+  - TypeScript: TypeScript Blog
+  - 全般: Hacker News, DEV Community
+
+**動作確認テスト**:
+- testRSSCollector.ts: RSS収集テストスクリプト
+- 実際に44件の記事を収集成功
+  - Real Python: 40件
+  - JavaScript Weekly: 4件
+- 最新記事の表示確認 ✅
+
+#### スクリプトコマンド
+```bash
+# 初期ソース登録
+MONGODB_URI=mongodb://localhost:27017/techstream npm run seed:sources
+
+# RSS収集テスト
+MONGODB_URI=mongodb://localhost:27017/techstream npm run test:rss
+```
+
+#### 学んだこと
+- rss-parserは型定義内蔵で使いやすい
+- RSSフィードによって構造が異なる（item.content vs item.contentSnippet）
+- URLパターンマッチングで言語検出は実用的
+- 新鮮さスコアは時間経過で減衰させる（6h→10点、24h→8点）
+- 実際のネットワークアクセスを伴うテストはタイムアウト設定が重要
+
+#### Git運用
+- feature/rss-collector ブランチで作業
+- mainブランチにマージ完了
+- コミットメッセージ: `feat: RSS収集機能を実装`
+
+#### 次回やること
+- Phase 3-2: ContentScheduler実装（定期自動収集）
+- Phase 4: REST API実装（記事取得エンドポイント）
+
 <!-- 今後の開発メモはここに追記 -->

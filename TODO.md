@@ -1,9 +1,8 @@
 # TechStream 開発TODO
 
 ## 🔥 今日やること
-- [ ] Phase 3: RSS収集機能
-  - [ ] RSS Parserの実装
-  - [ ] 基本的なソース登録（Python、JavaScript、Go等）
+- [ ] Phase 3-2: ContentScheduler実装（定期自動収集）
+- [ ] Phase 4: REST API実装
 
 ## 📋 Phase 1: 環境構築（Week 1-2）✅ **完了**
 
@@ -37,14 +36,17 @@
 - [x] ソース（Source）モデル設計・実装
 - [ ] ユーザー（User）モデル設計・実装（後回し）
 
-## 📋 Phase 3: RSS収集機能（Week 4）
+## 📋 Phase 3: RSS収集機能（Week 4）⏳ **進行中**
 
-### コンテンツ収集システム
-- [ ] RSS Parserの実装
-- [ ] 基本的なソース登録（Python, JavaScript, Go等）
-- [ ] 記事の分類ロジック実装（シンプル版）
-- [ ] データベースへの保存処理
+### Phase 3-1: RSS収集基盤（完了）
+- [x] RSS Parserの実装
+- [x] 基本的なソース登録（Python, JavaScript, Go等）
+- [x] 記事の分類ロジック実装（シンプル版）
+- [x] データベースへの保存処理
+
+### Phase 3-2: 自動収集（次回）
 - [ ] 定期実行のスケジューラー設定
+- [ ] ContentSchedulerの実装
 
 ## 📋 Phase 4: API開発（Week 5）
 
