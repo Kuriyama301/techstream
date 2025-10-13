@@ -151,4 +151,74 @@ gitmain  # → Kuriyama301, kuriyama.kosuke@gmail.com
 - MongoDB（記事、カテゴリ）のモデル定義
 - PostgreSQL（ユーザー）のテーブル設計
 
+---
+
+### 2025-10-13（Phase 2: MongoDBモデル実装）
+
+#### Phase 2完了 - MongoDBモデル実装
+- **ブランチ**: feature/database-models で作業
+- **開発手法**: TDD（テスト駆動開発）
+
+#### 実装内容
+
+**Jest設定**:
+- jest.config.js作成（ts-jest設定）
+- テスト環境でMongoDB接続設定
+- clearDatabase機能（テスト前のデータクリア）
+
+**Articleモデル**:
+- 記事の全情報を管理（タイトル、リンク、コンテンツ等）
+- 出典情報（sourceName、sourceType、sourceTier）
+- 分類情報（language、domain、technicalLevel、tags）
+- スコアリング（relevance、freshness、popularity、finalScore）
+- メタデータ（wordCount、hasCode、codeLanguages等）
+- 統計情報（views、clicks、bookmarks）
+- 複合インデックス設定（検索最適化）
+- テスト: 9件すべて合格 ✅
+
+**Sourceモデル**:
+- RSSフィードソース情報を管理
+- 基本情報（name、url、feedUrl）
+- 分類情報（type: official/media/community、tier: 1-3）
+- 収集設定（refreshInterval、isActive）
+- 統計情報（totalArticles、lastFetchedAt、failureCount）
+- テスト: 10件すべて合格 ✅
+
+**Categoryモデル**:
+- カテゴリ情報を管理（言語・ドメイン別）
+- 基本情報（name、slug、type: language/domain）
+- 表示設定（displayOrder、icon、color）
+- 統計情報（articleCount、lastUpdatedAt）
+- テスト: 11件すべて合格 ✅
+
+**型定義**:
+- IArticle（backend/src/types/article.ts）
+- ISource（backend/src/types/source.ts）
+- ICategory（backend/src/types/category.ts）
+
+#### テスト結果
+```
+Test Suites: 3 passed
+Tests:       30 passed
+Total:       Article(9) + Source(10) + Category(11) = 30 ✅
+```
+
+#### 学んだこと
+- TDDで進めることで、モデル設計の問題を早期発見
+- Mongooseのスキーマ定義とTypeScript型定義を分離
+- テスト環境ではMONGODB_URIをlocalhost指定
+- clearDatabase関数でテスト間の独立性を確保
+- インデックス設定で検索パフォーマンスを最適化
+- 複合インデックス（言語+スコア、ドメイン+スコア）が重要
+
+#### Git運用
+- feature/database-models ブランチで作業
+- mainブランチにマージ完了
+- コミットメッセージ: `feat: MongoDBモデル実装（Article、Source、Category）`
+
+#### 次回やること
+- Phase 3: RSS収集機能の実装
+- RSS Parserの実装
+- 基本的なソース登録（Python、JavaScript、Go等）
+
 <!-- 今後の開発メモはここに追記 -->

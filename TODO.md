@@ -1,9 +1,9 @@
 # TechStream 開発TODO
 
 ## 🔥 今日やること
-- [ ] Phase 2: データベーススキーマ設計
-  - [ ] MongoDB（記事、カテゴリ）のモデル定義
-  - [ ] PostgreSQL（ユーザー）のテーブル設計
+- [ ] Phase 3: RSS収集機能
+  - [ ] RSS Parserの実装
+  - [ ] 基本的なソース登録（Python、JavaScript、Go等）
 
 ## 📋 Phase 1: 環境構築（Week 1-2）✅ **完了**
 
@@ -29,13 +29,13 @@
   - [x] PostgreSQL（ユーザー管理用）セットアップ
   - [x] Redis（キャッシュ用）セットアップ
 
-## 📋 Phase 2: コアデータモデル（Week 3）
+## 📋 Phase 2: コアデータモデル（Week 3）✅ **完了**
 
 ### データベーススキーマ
-- [ ] 記事（Article）モデル設計・実装
-- [ ] カテゴリ（Category）モデル設計・実装
-- [ ] ユーザー（User）モデル設計・実装
-- [ ] ソース（Source）モデル設計・実装
+- [x] 記事（Article）モデル設計・実装
+- [x] カテゴリ（Category）モデル設計・実装
+- [x] ソース（Source）モデル設計・実装
+- [ ] ユーザー（User）モデル設計・実装（後回し）
 
 ## 📋 Phase 3: RSS収集機能（Week 4）
 
