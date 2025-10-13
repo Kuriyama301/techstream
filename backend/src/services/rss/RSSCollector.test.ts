@@ -7,7 +7,7 @@ describe('RSSCollector', () => {
 
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
-    process.env.MONGODB_URI = 'mongodb://localhost:27017/techstream_test';
+    process.env.MONGODB_URI = 'mongodb://mongodb:27017/techstream_test';
     await connectDatabase();
   }, 30000);
 

@@ -286,4 +286,134 @@ MONGODB_URI=mongodb://localhost:27017/techstream npm run test:rss
 - Phase 3-2: ContentScheduler実装（定期自動収集）
 - Phase 4: REST API実装（記事取得エンドポイント）
 
+---
+
+### 2025-10-13（Docker運用への切り替え）
+
+#### 問題発覚と対応
+**問題**: Phase 2-3でローカル環境で直接実行していた（Dockerを使っていなかった）
+- テスト: `npm test` → ローカルのNode.js
+- MongoDB接続: `mongodb://localhost:27017` → ローカル接続
+- Docker環境は起動していない状態
+
+**対応方針**: Docker運用に統一
+- デプロイ先もコンテナ運用予定のため、開発環境から一貫してDockerを使用
+- Phase 1で構築したDocker環境を活用
+
+#### Docker環境への切り替え完了
+
+**1. テストファイルの修正**
+- MongoDB接続URLを変更: `mongodb://localhost:27017` → `mongodb://mongodb:27017`
+- 修正対象ファイル:
+  - `backend/src/models/Article.test.ts`
+  - `backend/src/models/Source.test.ts`
+  - `backend/src/models/Category.test.ts`
+  - `backend/src/services/rss/RSSCollector.test.ts`
+
+**2. Docker Compose起動**
+```bash
+docker compose up -d --build
+```
+- 5つのサービスを起動: backend, frontend, mongodb, postgres, redis
+- すべてのサービスが正常起動 ✅
+
+**3. Docker内でテスト実行**
+```bash
+docker compose exec backend npm test
+```
+- **結果**: 全45件のテスト合格 ✅
+  - Article: 9件
+  - Source: 10件
+  - Category: 11件
+  - RSSCollector: 15件
+
+**4. Docker内でseedスクリプト実行**
+```bash
+docker compose exec backend npm run seed:sources
+```
+- **結果**: 9件のソース登録完了 ✅
+  - Python: 2件
+  - JavaScript: 2件
+  - Go, Rust, TypeScript: 各1件
+  - 全般（Hacker News, DEV Community）: 2件
+
+**5. Docker内でRSS収集テスト実行**
+```bash
+docker compose exec backend npm run test:rss
+```
+- **結果**: 44件の記事収集成功 ✅
+  - Python: 40件（Real Python）
+  - JavaScript: 4件（JavaScript Weekly）
+  - Python Insiderは404エラー（フィードURL変更の可能性）
+
+#### Docker運用ワークフロー確定
+
+**開発環境の起動・停止**
+```bash
+# サービス起動
+docker compose up -d
+
+# サービス停止
+docker compose down
+
+# ログ確認
+docker compose logs -f backend
+docker compose logs -f frontend
+```
+
+**テスト実行**
+```bash
+# 全テスト実行
+docker compose exec backend npm test
+
+# 特定のテストファイル実行
+docker compose exec backend npm test -- Article.test.ts
+```
+
+**スクリプト実行**
+```bash
+# ソースデータ登録
+docker compose exec backend npm run seed:sources
+
+# RSS収集テスト
+docker compose exec backend npm run test:rss
+```
+
+**データベース操作**
+```bash
+# MongoDBシェル接続
+docker compose exec mongodb mongosh techstream
+
+# PostgreSQLシェル接続
+docker compose exec postgres psql -U techstream -d techstream
+
+# Redisシェル接続
+docker compose exec redis redis-cli
+```
+
+**開発作業**
+```bash
+# backendコンテナに入る
+docker compose exec backend sh
+
+# frontendコンテナに入る
+docker compose exec frontend sh
+```
+
+#### 学んだこと
+- Docker環境では、サービス名がホスト名になる（`mongodb`、`postgres`、`redis`）
+- テストファイル内でMONGODB_URIを直接指定している場合、Docker用に修正が必要
+- docker-compose.ymlで環境変数を設定済みなので、通常のスクリプト実行では環境変数指定は不要
+- Docker内でのテスト実行は、ローカル実行と同じ速度で動作する
+- Phase 1で構築したDocker環境が本番環境の予行演習になっている
+
+#### 今後の方針
+- **すべての開発作業をDocker内で実行**
+- ローカル環境のNode.js、MongoDB等は使用しない
+- 本番デプロイ時もDockerコンテナを使用
+
+#### 次回やること
+- Phase 3-2: ContentScheduler実装（定期自動収集）
+- Phase 4: REST API実装（記事取得エンドポイント）
+
 <!-- 今後の開発メモはここに追記 -->

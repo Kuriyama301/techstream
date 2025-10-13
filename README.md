@@ -54,26 +54,116 @@ TechStreamは、エンジニアが効率的に技術情報をキャッチアッ�
 
 ## 開発状況
 
-現在: プロジェクト初期セットアップ中
+- ✅ Phase 1: Docker環境構築完了
+- ✅ Phase 2: MongoDBモデル実装完了（Article、Source、Category）
+- ✅ Phase 3-1: RSS収集機能実装完了
+- ⏳ Phase 3-2: ContentScheduler実装（次回）
+- ⏳ Phase 4: REST API実装（次回）
 
 進捗の詳細は[TODO.md](./TODO.md)を参照してください。
 
-## セットアップ（準備中）
+## セットアップ
+
+### 前提条件
+- Docker Desktop がインストールされていること
+- Git がインストールされていること
+
+### 環境構築手順
 
 ```bash
-# リポジトリのクローン
-git clone [repository-url]
+# 1. リポジトリのクローン
+git clone https://github.com/Kuriyama301/techstream.git
 cd news
 
-# フロントエンドのセットアップ
-cd frontend
-npm install
-npm run dev
+# 2. Docker Composeでサービスを起動
+docker compose up -d --build
 
-# バックエンドのセットアップ
-cd ../backend
-npm install
-npm run dev
+# 3. サービスの起動確認
+docker compose ps
+# すべてのサービスが "Up" になっていることを確認
+
+# 4. バックエンドのテスト実行
+docker compose exec backend npm test
+
+# 5. 初期データ（RSSソース）の登録
+docker compose exec backend npm run seed:sources
+
+# 6. RSS記事の収集テスト
+docker compose exec backend npm run test:rss
+```
+
+### アクセス
+
+- **フロントエンド**: http://localhost:3000
+- **バックエンドAPI**: http://localhost:4000
+- **バックエンドヘルスチェック**: http://localhost:4000/health
+- **MongoDB**: localhost:27017
+- **PostgreSQL**: localhost:5432
+- **Redis**: localhost:6379
+
+## 開発コマンド
+
+### Docker管理
+
+```bash
+# サービス起動
+docker compose up -d
+
+# サービス停止
+docker compose down
+
+# ログ確認
+docker compose logs -f backend
+docker compose logs -f frontend
+
+# サービス再起動
+docker compose restart backend
+```
+
+### テスト実行
+
+```bash
+# 全テスト実行
+docker compose exec backend npm test
+
+# 特定のテストファイル実行
+docker compose exec backend npm test -- Article.test.ts
+
+# テストのwatch mode
+docker compose exec backend npm test -- --watch
+```
+
+### スクリプト実行
+
+```bash
+# RSSソースデータの初期登録
+docker compose exec backend npm run seed:sources
+
+# RSS記事の収集テスト
+docker compose exec backend npm run test:rss
+```
+
+### データベース操作
+
+```bash
+# MongoDBシェル接続
+docker compose exec mongodb mongosh techstream
+
+# PostgreSQLシェル接続
+docker compose exec postgres psql -U techstream -d techstream
+
+# Redisシェル接続
+docker compose exec redis redis-cli
+```
+
+### コンテナ内で作業
+
+```bash
+# backendコンテナに入る
+docker compose exec backend sh
+
+# frontendコンテナに入る
+docker compose exec frontend sh
 ```
 
 ## ドキュメント
