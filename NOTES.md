@@ -101,4 +101,54 @@ gitmain  # → Kuriyama301, kuriyama.kosuke@gmail.com
 
 **教訓**: プロジェクト開始時は必ずGit設定を確認する
 
+---
+
+### 2025-10-13（Docker環境構築）
+
+#### Docker開発環境構築完了
+- **ブランチ**: feature/nextjs-setup で作業
+- **構成**: docker-compose.ymlで全サービスを一元管理
+
+#### 実装内容
+
+**フロントエンド（Next.js）**:
+- Next.js 15.5.4 プロジェクト作成
+- TypeScript + Tailwind CSS + ESLint + Prettier
+- Dockerfile（multi-stage build: development/production）
+- ディレクトリ構造: src/app, src/components, src/hooks, src/lib等
+- 動作確認: localhost:3000 ✅
+
+**バックエンド（Express）**:
+- Express + TypeScript プロジェクト作成
+- nodemon（開発時ホットリロード）
+- Dockerfile（multi-stage build: development/production）
+- 基本的なエンドポイント実装（/, /health）
+- 動作確認: localhost:4000 ✅
+
+**データベース・キャッシュ**:
+- MongoDB 7（localhost:27017）
+- PostgreSQL 16（localhost:5432）
+- Redis 7（localhost:6379）
+
+**Docker設定**:
+- docker-compose.yml: 5サービス構成
+- ネットワーク: techstream-network（bridge）
+- ボリューム: mongodb_data, postgres_data, redis_data
+
+#### 学んだこと
+- Docker Composeの`version`フィールドは obsolete（削除済み）
+- `npm ci`にはpackage-lock.jsonが必要
+- TypeScript strict設定で未使用変数エラー（`_req`で回避）
+- nodemonでts-nodeを使用すると開発時の自動リロードが便利
+
+#### Git運用
+- feature/nextjs-setup ブランチで作業
+- mainブランチにマージ完了
+- コミットメッセージ: `feat: Docker開発環境を構築`
+
+#### 次回やること
+- Phase 2: データベーススキーマ設計
+- MongoDB（記事、カテゴリ）のモデル定義
+- PostgreSQL（ユーザー）のテーブル設計
+
 <!-- 今後の開発メモはここに追記 -->

@@ -1,34 +1,33 @@
 # TechStream 開発TODO
 
 ## 🔥 今日やること
-- [ ] プロジェクト初期セットアップ完了
-  - [ ] TODO.md, NOTES.md作成
-  - [ ] ドキュメント整理
-  - [ ] .gitignore確認
+- [ ] Phase 2: データベーススキーマ設計
+  - [ ] MongoDB（記事、カテゴリ）のモデル定義
+  - [ ] PostgreSQL（ユーザー）のテーブル設計
 
-## 📋 Phase 1: 環境構築（Week 1-2）
+## 📋 Phase 1: 環境構築（Week 1-2）✅ **完了**
 
 ### フロントエンド
-- [ ] Next.jsプロジェクトのセットアップ
-  - [ ] `npx create-next-app@latest`で初期化
-  - [ ] TypeScript設定
-  - [ ] Tailwind CSS設定
-  - [ ] ESLint/Prettier設定
-  - [ ] ディレクトリ構造構築（app/, components/, lib/ etc.）
+- [x] Next.jsプロジェクトのセットアップ
+  - [x] `npx create-next-app@latest`で初期化
+  - [x] TypeScript設定
+  - [x] Tailwind CSS設定
+  - [x] ESLint/Prettier設定
+  - [x] ディレクトリ構造構築（app/, components/, lib/ etc.）
 
 ### バックエンド
-- [ ] Node.js + Express プロジェクトのセットアップ
-  - [ ] プロジェクト初期化
-  - [ ] TypeScript設定
-  - [ ] 基本的なディレクトリ構造構築
-  - [ ] ESLint/Prettier設定
+- [x] Node.js + Express プロジェクトのセットアップ
+  - [x] プロジェクト初期化
+  - [x] TypeScript設定
+  - [x] 基本的なディレクトリ構造構築
+  - [x] ESLint/Prettier設定
 
 ### データベース
-- [ ] ローカル開発環境構築
-  - [ ] Docker Compose設定
-  - [ ] MongoDB（DocumentDBの代替）セットアップ
-  - [ ] PostgreSQL（ユーザー管理用）セットアップ
-  - [ ] Redis（キャッシュ用）セットアップ
+- [x] ローカル開発環境構築
+  - [x] Docker Compose設定
+  - [x] MongoDB（DocumentDBの代替）セットアップ
+  - [x] PostgreSQL（ユーザー管理用）セットアップ
+  - [x] Redis（キャッシュ用）セットアップ
 
 ## 📋 Phase 2: コアデータモデル（Week 3）
 
