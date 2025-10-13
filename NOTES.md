@@ -80,4 +80,25 @@
 開発を再開
 ```
 
+#### ⚠️ Git設定の問題と修正
+**問題**: 仕事用のGit設定（oh-tsuchiya）で個人プロジェクトにコミット・プッシュしてしまった
+
+**修正内容**:
+1. Git設定を個人用に変更（Kuriyama301）
+2. `git filter-branch`で全コミット履歴の作成者を修正
+3. `git push --force`でGitHubに反映
+4. バックアップファイルをクリーンアップ
+
+**今後の予防策**:
+```bash
+# 作業開始前に必ず実行
+git config user.name
+git config user.email
+
+# 個人プロジェクトの場合は gitmain で切り替え
+gitmain  # → Kuriyama301, kuriyama.kosuke@gmail.com
+```
+
+**教訓**: プロジェクト開始時は必ずGit設定を確認する
+
 <!-- 今後の開発メモはここに追記 -->
