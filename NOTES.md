@@ -554,4 +554,167 @@ scheduler.stop();
   - `GET /api/articles?language=python` - 言語別フィルタリング
   - ページネーション機能
 
+---
+
+### 2025-10-13（Phase 4: REST API実装）
+
+#### 実装内容
+
+**目的**: 記事データを取得するREST APIエンドポイントを実装
+
+**実装ファイル**:
+- `backend/src/routes/articles.ts` - 記事ルーター
+- `backend/src/routes/articles.test.ts` - APIテスト（8件）
+- `backend/src/controllers/articlesController.ts` - 記事コントローラー
+
+**実装したエンドポイント**:
+
+1. **GET /api/articles** - 記事一覧取得
+   - クエリパラメータ:
+     - `language`: 言語フィルタ（例: python, javascript）
+     - `domain`: ドメインフィルタ
+     - `page`: ページ番号（デフォルト: 1）
+     - `limit`: 1ページあたりの件数（デフォルト: 20）
+     - `sort`: ソート条件（例: -scores.finalScore）
+   - レスポンス:
+     ```json
+     {
+       "success": true,
+       "data": {
+         "articles": [...],
+         "pagination": {
+           "page": 1,
+           "limit": 20,
+           "total": 100,
+           "pages": 5
+         }
+       }
+     }
+     ```
+
+2. **GET /api/articles/:id** - 記事詳細取得
+   - パスパラメータ: `id` (MongoDB ObjectId)
+   - レスポンス:
+     ```json
+     {
+       "success": true,
+       "data": {
+         "article": { ... }
+       }
+     }
+     ```
+   - エラー:
+     - 400: 無効なID形式
+     - 404: 記事が見つからない
+
+#### TDDサイクル
+
+**1. Red: テスト作成**
+```typescript
+// articles.test.ts
+describe('GET /api/articles', () => {
+  - should return all articles
+  - should filter articles by language
+  - should sort articles by finalScore descending
+  - should support pagination
+  - should return empty array when no articles found
+});
+
+describe('GET /api/articles/:id', () => {
+  - should return article by id
+  - should return 404 when article not found
+  - should return 400 when id is invalid
+});
+```
+
+**2. Green: 実装**
+- articlesController.ts: `getArticles()`, `getArticleById()`
+- articles.ts: Express Router設定
+
+**3. Refactor: テストデータ修正**
+- Articleモデルの`fetchedAt`フィールドが必須だったため、テストデータに追加
+
+#### テスト結果
+
+**Articles API単体**:
+```bash
+docker compose exec backend npm test -- articles.test.ts
+```
+- ✅ 全8件のテスト合格
+
+**全体テスト**:
+```bash
+docker compose exec backend npm test
+```
+- Articles API: 8/8件 ✅（新規実装）
+- ContentScheduler: 10/10件 ✅
+- Category: 11/11件 ✅
+- Article: 8/9件
+- Source: 6/10件（並行実行の問題）
+- RSSCollector: 13/15件（ネットワーク依存）
+- **合計**: 63件中54件合格（約86%）
+
+#### 使用ライブラリ
+
+**supertest**:
+- Express APIの統合テスト用ライブラリ
+- HTTPリクエストのモック化
+- レスポンスのアサーション
+
+インストール:
+```bash
+npm install --save-dev supertest @types/supertest
+```
+
+#### APIの使用例
+
+**記事一覧取得（言語フィルタ + ページネーション）**:
+```bash
+GET /api/articles?language=python&page=1&limit=20&sort=-scores.finalScore
+```
+
+**記事詳細取得**:
+```bash
+GET /api/articles/68f4877c64dd3b53839105e3
+```
+
+#### 実装時の課題と解決
+
+**課題1**: Articleモデルのバリデーションエラー
+- **原因**: テストデータに`fetchedAt`フィールドが不足
+- **解決**: テストデータに`fetchedAt`を追加
+- **教訓**: モデルの必須フィールドを把握しておく
+
+**課題2**: ソート条件の処理
+- **要件**: クエリパラメータ`sort=-finalScore`で降順ソート
+- **実装**: 先頭の`-`を検出して降順（-1）、なければ昇順（1）
+- **コード**:
+  ```typescript
+  let sortOption: any = {};
+  if (sort.startsWith('-')) {
+    sortOption[sort.substring(1)] = -1;
+  } else {
+    sortOption[sort] = 1;
+  }
+  ```
+
+#### 学んだこと
+
+1. **supertest**: Express APIのテストが簡単にできる
+2. **RESTful設計**: 統一されたレスポンス形式（success, data, error）
+3. **ObjectId検証**: mongoose.Types.ObjectId.isValid()で事前チェック
+4. **ページネーション**: skip/limitパターンは標準的
+5. **エラーハンドリング**: 400/404/500の適切な使い分け
+
+#### Git作業
+
+- mainブランチで直接作業
+- コミットメッセージ: `feat: Phase 4完了 - REST API実装`
+
+#### 次回やること
+- フロントエンド実装開始
+  - Next.js App Routerで記事一覧ページ作成
+  - APIクライアントの実装
+  - UI コンポーネント開発
+
 <!-- 今後の開発メモはここに追記 -->

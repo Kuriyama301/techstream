@@ -1,7 +1,7 @@
 # TechStream 開発TODO
 
 ## 🔥 今日やること
-- [ ] Phase 4: REST API実装（記事取得エンドポイント）
+- [ ] Phase 5: フロントエンド基本実装
 
 ## 📋 Phase 1: 環境構築（Week 1-2）✅ **完了**
 
@@ -47,14 +47,15 @@
 - [x] 定期実行のスケジューラー設定（node-cron）
 - [x] ContentSchedulerの実装（10件のテスト）
 
-## 📋 Phase 4: API開発（Week 5）
+## 📋 Phase 4: API開発（Week 5）✅ **完了**
 
 ### RESTful API
-- [ ] 記事一覧取得API
-- [ ] 記事詳細取得API
-- [ ] カテゴリ別記事取得API
-- [ ] 言語別記事取得API
-- [ ] 基本的な認証API（後回しでもOK）
+- [x] 記事一覧取得API（GET /api/articles）
+- [x] 記事詳細取得API（GET /api/articles/:id）
+- [x] フィルタリング機能（言語・ドメイン別）
+- [x] ページネーション機能
+- [x] ソート機能
+- [ ] 基本的な認証API（後回し）
 
 ## 📋 Phase 5: フロントエンド基本実装（Week 6-7）
 
