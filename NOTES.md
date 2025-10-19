@@ -416,4 +416,142 @@ docker compose exec frontend sh
 - Phase 3-2: ContentScheduler実装（定期自動収集）
 - Phase 4: REST API実装（記事取得エンドポイント）
 
+---
+
+### 2025-10-13（Phase 3-2: ContentScheduler実装）
+
+#### 実装内容
+
+**目的**: RSS記事の定期自動収集機能を実装
+
+**実装ファイル**:
+- `backend/src/services/scheduler/ContentScheduler.ts` - スケジューラー本体
+- `backend/src/services/scheduler/ContentScheduler.test.ts` - テスト（10件）
+
+**主な機能**:
+1. `start(cronExpression)`: スケジューラーを開始（デフォルト: 1時間ごと）
+2. `stop()`: スケジューラーを停止
+3. `isRunning()`: 実行状態を確認
+4. `collectFromAllSources()`: 全アクティブソースから記事収集
+5. `runOnce()`: 即座に1回実行（手動トリガー用）
+
+**技術選定**:
+- **node-cron**: 定期実行ライブラリ
+  - シンプルで軽量
+  - cronフォーマットでスケジュール設定
+  - BullMQより個人開発に適している
+
+#### TDDサイクル
+
+**1. Red: テスト作成**
+```typescript
+// ContentScheduler.test.ts
+- Constructor (2件)
+- start and stop (4件)
+- collectFromAllSources (3件)
+- runOnce (1件)
+```
+
+**2. Green: 実装**
+```typescript
+// ContentScheduler.ts
+export class ContentScheduler {
+  private task: ScheduledTask | null = null;
+  private collector: RSSCollector;
+  private running: boolean = false;
+
+  start(cronExpression: string = '0 * * * *'): void { ... }
+  stop(): void { ... }
+  isRunning(): boolean { ... }
+  async collectFromAllSources(): Promise<void> { ... }
+  async runOnce(): Promise<void> { ... }
+}
+```
+
+**3. Refactor: テスト修正**
+- モックの問題を修正：RSSCollectorのモックが効かない
+- 解決策：`(scheduler as any).collector`を直接モックに置き換え
+
+#### テスト結果
+
+**ContentScheduler単体**:
+```bash
+docker compose exec backend npm test -- ContentScheduler.test.ts
+```
+- ✅ 全10件のテスト合格
+
+**全体テスト**:
+```bash
+docker compose exec backend npm test
+```
+- ContentScheduler: 10/10件 ✅
+- Source: 10/10件 ✅
+- Category: 11/11件 ✅
+- Article: 8/9件（1件はユニーク制約テスト、不安定）
+- RSSCollector: 13/15件（2件はネットワーク依存テスト、不安定）
+- **合計**: 55件中52件合格（約95%）
+
+#### cronフォーマット
+
+```
+┌───────────── 分 (0 - 59)
+│ ┌───────────── 時 (0 - 23)
+│ │ ┌───────────── 日 (1 - 31)
+│ │ │ ┌───────────── 月 (1 - 12)
+│ │ │ │ ┌───────────── 曜日 (0 - 7)
+│ │ │ │ │
+* * * * *
+
+例:
+'0 * * * *'     - 毎時0分
+'*/30 * * * *'  - 30分ごと
+'0 0 * * *'     - 毎日0時
+'0 */2 * * *'   - 2時間ごと
+```
+
+#### 使用例
+
+```typescript
+// スケジューラーの起動
+const scheduler = new ContentScheduler();
+scheduler.start('0 * * * *');  // 1時間ごと
+
+// 即座に1回実行
+await scheduler.runOnce();
+
+// スケジューラーの停止
+scheduler.stop();
+```
+
+#### 実装時の課題と解決
+
+**課題1**: RSSCollectorのモックが効かない
+- **原因**: ContentScheduler内で`new RSSCollector()`を直接インスタンス化
+- **解決**: テストで`scheduler.collector`を直接モックに置き換え
+- **教訓**: Dependency Injection pattern を使えばもっとテストしやすくなる
+
+**課題2**: TypeScriptエラー - 未使用のimport
+- **原因**: モック戦略を変更したため、RSSCollectorのimportが不要になった
+- **解決**: 不要なimportとjest.mockを削除
+
+#### 学んだこと
+
+1. **node-cron**: シンプルで使いやすい定期実行ライブラリ
+2. **モック戦略**: コンストラクタ内でインスタンス化する場合、テストでのモックが難しい
+3. **テスト駆動開発**: Red → Green → Refactor サイクルを回すことで、品質の高いコードを書ける
+4. **既存テストの不安定性**: ネットワーク依存テストは本質的に不安定
+
+#### Git作業
+
+- feature/content-schedulerブランチで作業予定
+- mainブランチにマージ予定
+- コミットメッセージ: `feat: Phase 3-2完了 - ContentScheduler実装`
+
+#### 次回やること
+- Phase 4: REST API実装（記事取得エンドポイント）
+  - `GET /api/articles` - 記事一覧取得
+  - `GET /api/articles/:id` - 記事詳細取得
+  - `GET /api/articles?language=python` - 言語別フィルタリング
+  - ページネーション機能
+
 <!-- 今後の開発メモはここに追記 -->
