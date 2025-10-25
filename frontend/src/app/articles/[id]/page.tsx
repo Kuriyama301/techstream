@@ -9,6 +9,7 @@ import { fetchArticleById, fetchArticles } from '@/lib/api/articles';
 import { Article } from '@/types/article';
 import { ShareButtons } from '@/components/features/ShareButtons';
 import { ArticleDescription } from '@/components/features/ArticleDescription';
+import { Header } from '@/components/layout/Header';
 
 /**
  * カテゴリーの表示名を取得
@@ -113,14 +114,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* ヘッダー */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link href="/" className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+      {/* ヘッダー（言語切り替え機能付き） */}
+      <Header />
+
+      {/* トップに戻るリンク */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <Link href="/" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm">
             ← トップに戻る
           </Link>
         </div>
-      </header>
+      </div>
 
       {/* メインコンテンツ */}
       <main className="max-w-4xl mx-auto px-4 py-8">

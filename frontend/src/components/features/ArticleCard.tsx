@@ -2,8 +2,11 @@
  * 記事カードコンポーネント
  * 記事の概要を表示するカードUI
  */
+'use client';
+
 import { Article } from '@/types/article';
 import Link from 'next/link';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ArticleCardProps {
   article: Article;
@@ -55,6 +58,14 @@ const formatRelativeTime = (dateString: string): string => {
 };
 
 export function ArticleCard({ article }: ArticleCardProps) {
+  const { language } = useLanguage();
+
+  // 言語設定に応じて表示するテキストを決定
+  const displayDescription =
+    language === 'ja' && article.translatedDescription
+      ? article.translatedDescription
+      : article.description;
+
   return (
     <Link
       href={`/articles/${article._id}`}
@@ -96,10 +107,10 @@ export function ArticleCard({ article }: ArticleCardProps) {
           {article.title}
         </h3>
 
-        {/* 説明 */}
-        {article.description && (
+        {/* 説明（言語切り替え対応） */}
+        {displayDescription && (
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-            {article.description}
+            {displayDescription}
           </p>
         )}
 

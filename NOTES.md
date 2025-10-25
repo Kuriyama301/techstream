@@ -1074,9 +1074,96 @@ docker compose exec mongodb mongosh techstream --eval \
 **セキュリティ注意**:
 - ⚠️ DeepL APIキーが会話に含まれたため、後で再生成推奨
 
-#### Git作業（次回実施予定）
+#### Git作業
 
 - mainブランチで直接作業
 - コミットメッセージ: `feat: Phase 7完了 - 翻訳機能実装（日英切り替え）`
+- プッシュ完了: origin/main ✅
+
+---
+
+### 2025-10-25（セッション3続き）
+
+### 言語切り替え機能の改善
+
+#### 課題の発見
+
+**UX問題**: 言語切り替えがリアルタイムで動作しない
+- 記事詳細ページに言語切り替えボタンがなかった
+- トップページの記事カードは英語のまま表示されていた
+- ページをリロードしないと翻訳版が表示されない
+
+#### 実装した改善
+
+**1. 記事詳細ページにHeaderコンポーネント追加**:
+- `/articles/[id]/page.tsx` にHeaderコンポーネント導入
+- 独自のheader要素を削除し、統一されたUIに変更
+- 「← トップに戻る」リンクを別要素として配置
+- これにより記事詳細ページでも言語切り替えが可能に
+
+**2. ArticleCardコンポーネントの言語切り替え対応**:
+- `ArticleCard.tsx` をClient Componentに変更（'use client'）
+- `useLanguage()` フックで現在の言語設定を取得
+- 説明文を言語に応じて切り替え:
+  - 日本語（JP）選択時: `translatedDescription`（翻訳版）
+  - 英語（EN）選択時: `description`（原文）
+
+#### 技術的実装
+
+**リアルタイム切り替えの仕組み**:
+```typescript
+// ArticleCard.tsx
+const { language } = useLanguage();
+
+const displayDescription =
+  language === 'ja' && article.translatedDescription
+    ? article.translatedDescription
+    : article.description;
+```
+
+**動作フロー**:
+```
+1. ユーザーが🌐ボタンをクリック
+   ↓
+2. LanguageContextの状態が更新 (ja ↔ en)
+   ↓
+3. 全てのClient Componentsが自動的に再レンダリング
+   ↓
+4. 記事カードと記事詳細の説明文が即座に切り替わる
+```
+
+#### 翻訳対応範囲
+
+| ページ | コンポーネント | 対応状況 |
+|--------|---------------|---------|
+| トップページ | ArticleCard | ✅ 実装完了 |
+| 記事詳細ページ | ArticleDescription | ✅ 実装済み |
+| 記事詳細ページ | Header（言語切り替え） | ✅ 追加完了 |
+
+#### 動作確認
+
+- ✅ トップページで🌐ボタンをクリック → 全記事カードの説明文が即座に切り替わる
+- ✅ 記事詳細ページで🌐ボタンをクリック → 説明文が即座に切り替わる
+- ✅ ページリロード不要
+- ✅ localStorage で言語設定が永続化される
+
+#### 学んだこと
+
+1. **Client ComponentとServer Componentの使い分け**:
+   - 状態管理（Context）を使う場合はClient Component必須
+   - ArticleCardは元々Server Componentだったが、useLanguageを使うためClient Componentに変更
+
+2. **UI統一の重要性**:
+   - 記事詳細ページに独自のheaderがあると、機能の一貫性が損なわれる
+   - Headerコンポーネントを全ページで共有することで、統一されたUXを実現
+
+3. **Reactのリアクティブ性**:
+   - Context APIの状態変更は、全ての購読コンポーネントに自動的に伝播
+   - 明示的な更新処理は不要
+
+#### Git作業（次回実施予定）
+
+- mainブランチで直接作業
+- コミットメッセージ: `fix: 言語切り替え機能の改善（全ページ対応）`
 
 <!-- 今後の開発メモはここに追記 -->
