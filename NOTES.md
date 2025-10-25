@@ -841,4 +841,84 @@ GET http://localhost:4000/api/articles?category=data&limit=2
 - mainブランチで直接作業
 - コミットメッセージ: `feat: Phase 5完了 - カテゴリー別UI実装とフロントエンド基盤構築`
 
+---
+
+## 2025-10-25（セッション2）
+
+### Phase 6完了: 記事詳細ページとSEO対策
+
+#### 実装内容
+
+**記事詳細ページ（`/articles/[id]/page.tsx`）**:
+- 動的ルーティングの実装（Next.js 15のasync params対応）
+- SEO対策のためのメタデータ生成（`generateMetadata`）
+- OGPタグ設定（Twitter Card、Facebook対応）
+- パンくずリスト表示
+- 記事基本情報表示（タイトル、カテゴリー、ソース、日付、説明）
+- 「元記事を読む」ボタン
+- 関連記事表示（同カテゴリー3件）
+
+**SNSシェアボタンコンポーネント（`ShareButtons.tsx`）**:
+- Twitter、Facebook、LinkedIn の3つのSNSシェア機能
+- レスポンシブデザイン（モバイル: アイコンのみ、デスクトップ: テキスト付き）
+- 各プラットフォームのブランドカラーを使用
+
+**ArticleCard更新**:
+- 外部リンクから内部リンク（`/articles/[id]`）に変更
+- 詳細ページへの遷移を実現
+
+#### 技術的対応
+
+**Next.js 15対応**:
+- `params` が Promise型に変更されたため、`await params` で取得
+- `generateMetadata` と `ArticlePage` の両方で対応
+
+**TypeScript型修正**:
+- `articles.ts` の `any` 型を `Pagination` に修正
+- 未使用変数の削除（`error`、`encodedDescription`）
+- 全てのESLintエラーと警告を解消（imgタグの警告は保留）
+
+**開発環境の問題解決**:
+- ビルドエラーによる `.next` ディレクトリ破損
+- フロントエンドコンテナ再起動で解決
+
+#### 動作確認
+
+実際の記事で全機能を確認:
+- ✅ SEOメタタグ（title、description）
+- ✅ OGPタグ（og:title、og:description、og:type、article:published_time）
+- ✅ Twitter Card タグ
+- ✅ SNSシェアボタン（3種類）
+- ✅ 関連記事表示
+- ✅ ArticleCardからの遷移
+
+#### 学んだこと
+
+1. **Next.js 15の変更点**: paramsが非同期化され、より厳密な型チェックが導入された
+2. **SEO対策の基本**: メタタグ、OGPタグの正しい設定方法
+3. **法的配慮**: RSSのdescriptionのみ表示することで著作権問題を回避
+4. **ビルドエラーの対処**: `.next` ディレクトリ破損時はコンテナ再起動が有効
+
+#### 今後の課題
+
+**機能面**:
+- JSON-LD構造化データの実装（検索エンジン最適化）
+- Web開発、システム/インフラカテゴリーのRSSソース追加
+- ページネーション実装
+- 検索機能、ブックマーク機能
+
+**パフォーマンス**:
+- Next.js Imageコンポーネント導入（現在はimgタグ）
+- 画像の遅延読み込み最適化
+
+**SEO**:
+- sitemap.xml生成
+- robots.txt設定
+- パフォーマンス最適化（Core Web Vitals）
+
+#### Git作業
+
+- mainブランチで直接作業
+- コミットメッセージ: `feat: Phase 6完了 - 記事詳細ページとSEO対策実装`
+
 <!-- 今後の開発メモはここに追記 -->
