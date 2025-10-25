@@ -57,9 +57,7 @@ const formatRelativeTime = (dateString: string): string => {
 export function ArticleCard({ article }: ArticleCardProps) {
   return (
     <Link
-      href={article.link}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={`/articles/${article._id}`}
       className="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
     >
       {/* サムネイル画像（あれば） */}

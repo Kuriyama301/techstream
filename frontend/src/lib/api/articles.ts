@@ -2,7 +2,7 @@
  * 記事データ取得API クライアント
  */
 import { Article } from '@/types/article';
-import { ApiResponse, PaginatedResponse } from '@/types/api';
+import { ApiResponse, Pagination, PaginatedResponse } from '@/types/api';
 
 // バックエンドのベースURL
 // Docker環境ではサービス名、ブラウザからはlocalhost
@@ -52,7 +52,7 @@ export async function fetchArticles(
       throw new Error(`Failed to fetch articles: ${response.statusText}`);
     }
 
-    const data: ApiResponse<{ articles: Article[]; pagination: any }> =
+    const data: ApiResponse<{ articles: Article[]; pagination: Pagination }> =
       await response.json();
 
     return {
