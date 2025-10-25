@@ -7,6 +7,7 @@ const ArticleSchema = new Schema<IArticle>(
     title: { type: String, required: true, index: true },
     link: { type: String, required: true, unique: true },
     description: { type: String },
+    translatedDescription: { type: String }, // 日本語翻訳（DeepL）
     content: { type: String },
     imageUrl: { type: String },
 

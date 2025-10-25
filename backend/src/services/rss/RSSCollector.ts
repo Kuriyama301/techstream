@@ -1,5 +1,6 @@
 import Parser from 'rss-parser';
 import { Article, Source } from '../../models';
+import { translator } from '../translation/DeepLTranslator';
 
 export class RSSCollector {
   private parser: Parser;
@@ -30,11 +31,18 @@ export class RSSCollector {
         const exists = await Article.findOne({ link: item.link });
         if (exists) continue;
 
+        // descriptionを取得
+        const description = item.contentSnippet || item.content || '';
+
+        // 英語→日本語に翻訳
+        const translatedDescription = await translator.translateToJapanese(description);
+
         // 新規記事を保存
         await Article.create({
           title: item.title || 'Untitled',
           link: item.link,
-          description: item.contentSnippet || item.content || '',
+          description,
+          translatedDescription,
           content: item.content || '',
           publishedAt: item.pubDate ? new Date(item.pubDate) : new Date(),
           fetchedAt: new Date(),

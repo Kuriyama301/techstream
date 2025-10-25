@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { fetchArticleById, fetchArticles } from '@/lib/api/articles';
 import { Article } from '@/types/article';
 import { ShareButtons } from '@/components/features/ShareButtons';
+import { ArticleDescription } from '@/components/features/ArticleDescription';
 
 /**
  * カテゴリーの表示名を取得
@@ -191,14 +192,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             </div>
           )}
 
-          {/* 記事の説明（RSSのdescription） */}
-          {article.description && (
-            <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                {article.description}
-              </p>
-            </div>
-          )}
+          {/* 記事の説明（言語切り替え対応） */}
+          <ArticleDescription
+            description={article.description}
+            translatedDescription={article.translatedDescription}
+          />
 
           {/* 元記事を読むボタン */}
           <div className="mb-8">

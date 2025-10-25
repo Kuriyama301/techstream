@@ -921,4 +921,162 @@ GET http://localhost:4000/api/articles?category=data&limit=2
 - mainブランチで直接作業
 - コミットメッセージ: `feat: Phase 6完了 - 記事詳細ページとSEO対策実装`
 
+---
+
+### 2025-10-25（セッション3）
+
+### Phase 7完了: 翻訳機能実装（日英切り替え）
+
+#### 課題の発見
+
+**UX問題**: 記事詳細ページで長い英語テキストが表示され、日本人ユーザーにとって読みづらい
+- RSS descriptionが英語のまま表示されている
+- 日本人ユーザーは記事内容を理解できない
+
+**解決方針**:
+- AI翻訳（DeepL）を導入して日本語訳を提供
+- ヘッダーに言語切り替えトグル（🌐 JP / EN）を配置
+- 翻訳はRSS descriptionのみ（著作権問題を回避）
+
+#### バックエンド実装
+
+**環境変数管理**:
+- `.env.example` テンプレート作成（Git管理）
+- `.env` 作成（DeepL APIキー保存、.gitignore対象）
+- `docker-compose.yml` に `env_file` ディレクティブ追加
+
+**DeepL API統合**:
+- `backend/src/services/translation/DeepLTranslator.ts` 作成
+  - DeepL Free API（500k文字/月、:fx キー）
+  - シングルトンパターン
+  - `translateToJapanese()`: 単体翻訳
+  - `translateBatch()`: バッチ翻訳（レート制限対応）
+  - `getUsage()`: API使用量確認
+  - 翻訳失敗時は元のテキストにフォールバック
+
+**Articleモデル更新**:
+- `translatedDescription` フィールド追加（string, optional）
+- バックエンド型定義（`backend/src/types/article.ts`）
+- Mongooseスキーマ（`backend/src/models/Article.ts`）
+
+**RSS収集時の自動翻訳**:
+- `RSSCollector.ts` にDeepL統合
+- 新規記事収集時に自動的に日本語翻訳を生成
+- `translatedDescription` フィールドに保存
+
+**既存記事の一括翻訳**:
+- `translateExistingArticles.ts` マイグレーションスクリプト作成
+- 44件の既存記事を全て翻訳
+- レート制限対応（150ms間隔）
+- 実行結果: 44/44件成功
+
+**リセットスクリプト**:
+- `resetTranslations.ts` 作成（トラブル時の再翻訳用）
+
+#### フロントエンド実装
+
+**言語コンテキスト**:
+- `frontend/src/contexts/LanguageContext.tsx` 作成
+  - グローバル言語状態管理（'ja' | 'en'）
+  - localStorageで永続化
+  - `useLanguage()` カスタムフック
+  - `toggleLanguage()` 切り替え関数
+
+**LanguageProvider統合**:
+- `frontend/src/app/layout.tsx` で全体をラップ
+- html lang属性を "en" → "ja" に変更
+
+**Headerコンポーネント**:
+- `frontend/src/components/layout/Header.tsx` 作成
+  - TechStreamロゴ・サブタイトル
+  - 言語切り替えトグル（🌐 JP / EN）
+  - ダークモード対応スタイル
+
+**ArticleDescriptionコンポーネント**:
+- `frontend/src/components/features/ArticleDescription.tsx` 作成
+  - 言語設定に応じて翻訳版/原文を表示
+  - 日本語表示時に「※ AI翻訳（DeepL）による参考訳」注記
+  - Client Componentとして実装
+
+**記事詳細ページ更新**:
+- `frontend/src/app/articles/[id]/page.tsx`
+  - ArticleDescriptionコンポーネント導入
+  - Server Component（記事取得） + Client Component（翻訳表示）のハイブリッド構成
+
+**トップページ更新**:
+- `frontend/src/app/page.tsx`
+  - 新しいHeaderコンポーネント使用
+
+**型定義更新**:
+- `frontend/src/types/article.ts` に `translatedDescription` フィールド追加
+
+#### 技術的課題と解決
+
+**課題1: TypeScript型エラー（DeepL APIレスポンス）**
+- エラー: `Property 'text' does not exist on type 'never'`
+- 原因: DeepLのレスポンス型が複雑（単体/配列の両方に対応）
+- 解決: 型アサーション `(results as any).text` を使用
+
+**課題2: 環境変数が読み込まれない**
+- 原因: `.env` ファイル作成後、Dockerコンテナに反映されていない
+- 解決: `docker compose down backend && docker compose up -d backend` で再起動
+
+**課題3: deepl-nodeパッケージ消失**
+- 原因: コンテナ再起動時に node_modules がリセット
+- 解決: `docker compose exec backend npm install deepl-node` で再インストール
+
+**課題4: 初回翻訳実行で翻訳されない**
+- 原因: API キーが環境変数として読み込まれていなかった
+- 解決: resetTranslations.ts で全削除 → 環境変数確認 → 再翻訳実行
+
+#### 動作確認
+
+**翻訳データ確認**:
+```bash
+docker compose exec mongodb mongosh techstream --eval \
+  'db.articles.find({translatedDescription:{$exists:true}}).count()'
+# → 44件すべてに翻訳データあり
+```
+
+**フロントエンド確認**:
+- ✅ ヘッダーに言語切り替えトグル表示
+- ✅ 日本語（JP）選択時: 翻訳版表示 + "※ AI翻訳（DeepL）による参考訳" 注記
+- ✅ 英語（EN）選択時: 原文表示
+- ✅ localStorage で言語設定が永続化
+- ✅ curlでHTMLを確認し、翻訳テキストが含まれることを確認
+
+#### 学んだこと
+
+1. **DeepL Free API**: 個人開発には十分な無料枠（500k文字/月）
+2. **Docker環境変数**: `env_file` ディレクティブでの管理が便利
+3. **Server/Client Components**: Next.js 15でのハイブリッド構成パターン
+4. **翻訳の法的配慮**: RSS提供のコンテンツを翻訳するのは問題ないが、透明性のため注記を追加
+5. **バッチ処理のレート制限**: 無料APIでは10req/secの制限があるため、150ms間隔が安全
+
+#### 今後の課題
+
+**高優先**:
+- コンテンツ拡充: Web開発、システム/インフラカテゴリーのRSSソース追加
+- パフォーマンス: ページネーション実装
+- UI改善: Next.js Imageコンポーネント導入（imgタグ警告解消）
+
+**中優先**:
+- 検索機能（キーワード、タグ、ソース別）
+- JSON-LD構造化データ
+- sitemap.xml生成
+
+**低優先**:
+- ユーザー認証
+- ブックマーク機能
+- ダークモードトグル
+- PWA対応
+
+**セキュリティ注意**:
+- ⚠️ DeepL APIキーが会話に含まれたため、後で再生成推奨
+
+#### Git作業（次回実施予定）
+
+- mainブランチで直接作業
+- コミットメッセージ: `feat: Phase 7完了 - 翻訳機能実装（日英切り替え）`
+
 <!-- 今後の開発メモはここに追記 -->

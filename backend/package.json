@@ -12,7 +12,8 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "seed:sources": "ts-node src/scripts/seedSources.ts",
-    "migrate:categories": "ts-node src/scripts/migrateCategories.ts"
+    "migrate:categories": "ts-node src/scripts/migrateCategories.ts",
+    "translate:articles": "ts-node src/scripts/translateExistingArticles.ts"
   },
   "keywords": [
     "express",
@@ -24,6 +25,7 @@
   "dependencies": {
     "@types/node-cron": "^3.0.11",
     "cors": "^2.8.5",
+    "deepl-node": "^1.20.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",

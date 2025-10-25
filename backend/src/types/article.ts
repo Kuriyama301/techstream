@@ -3,6 +3,7 @@ export interface IArticle {
   title: string;
   link: string;
   description?: string;
+  translatedDescription?: string; // 日本語翻訳（DeepL）
   content?: string;
   imageUrl?: string;
 

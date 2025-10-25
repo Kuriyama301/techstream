@@ -9,6 +9,7 @@ import { Article } from '@/types/article';
 import { fetchArticles } from '@/lib/api/articles';
 import { ArticleCard } from '@/components/features/ArticleCard';
 import { TabNavigation } from '@/components/layout/TabNavigation';
+import { Header } from '@/components/layout/Header';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'all' | 'web' | 'system' | 'data'>('all');
@@ -39,17 +40,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* ヘッダー */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            TechStream
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            エンジニア向けニュースアプリ
-          </p>
-        </div>
-      </header>
+      {/* ヘッダー（言語切り替え機能付き） */}
+      <Header />
 
       {/* タブナビゲーション */}
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
