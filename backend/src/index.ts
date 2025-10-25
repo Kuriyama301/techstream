@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { articlesRouter } from './routes/articles';
 
 // 環境変数を読み込み
 dotenv.config();
@@ -10,6 +12,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || '0.0.0.0';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongodb:27017/techstream';
+
+// MongoDB接続
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+  })
+  .catch((error) => {
+    console.error('❌ MongoDB connection error:', error);
+    process.exit(1);
+  });
 
 // ミドルウェア
 app.use(helmet()); // セキュリティヘッダー
@@ -17,6 +31,9 @@ app.use(cors()); // CORS設定
 app.use(morgan('dev')); // ログ
 app.use(express.json()); // JSONボディパース
 app.use(express.urlencoded({ extended: true })); // URLエンコードボディパース
+
+// APIルート
+app.use('/api/articles', articlesRouter);
 
 // ヘルスチェックエンドポイント
 app.get('/health', (_req: Request, res: Response) => {
@@ -34,6 +51,7 @@ app.get('/', (_req: Request, res: Response) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
+      articles: '/api/articles',
     },
   });
 });

@@ -712,9 +712,133 @@ GET /api/articles/68f4877c64dd3b53839105e3
 - コミットメッセージ: `feat: Phase 4完了 - REST API実装`
 
 #### 次回やること
-- フロントエンド実装開始
-  - Next.js App Routerで記事一覧ページ作成
-  - APIクライアントの実装
-  - UI コンポーネント開発
+- 記事詳細ページの実装（SEO対策）
+  - /articles/[id] ページ作成
+  - メタタグ・OGP対応
+  - SNSシェアボタン
+
+---
+
+### 2025-10-25（Phase 5: フロントエンド実装完了）
+
+#### 要件変更：言語別 → カテゴリー別に設計変更
+
+**背景**: 言語別だと記事が分散して少なくなるため、カテゴリーでまとめる方針に変更
+
+**新カテゴリー**:
+- **Web開発** (`web`) - JavaScript, TypeScript, Node.js, React等
+- **システム/インフラ** (`system`) - Go, Rust, Docker, Kubernetes等
+- **データ/AI** (`data`) - Python（データサイエンス・ML中心）
+
+**将来の拡張**: デザイン、SaaS等のカテゴリー追加も想定
+
+#### バックエンド修正
+
+**Articleモデル**:
+- `classification.category` フィールドを追加（'web' | 'system' | 'data' | 'design' | 'saas'）
+- `classification.language` は具体的な言語名として残す
+- インデックスを `category` ベースに変更
+
+**RSSCollector**:
+- `detectCategory()` メソッドを追加
+  - URLから自動的にカテゴリーを判定
+  - Web関連キーワード（javascript, react, node等）→ 'web'
+  - システム関連（rust, go, docker等）→ 'system'
+  - データ関連（ml, ai, data-science等）→ 'data'
+- `detectLanguage()` は引き続き言語名を記録
+
+**API**:
+- `GET /api/articles?category=web` パラメータに対応
+- `index.ts` にMongoDB接続とAPIルート登録を追加
+
+**データ移行**:
+- `migrateCategories.ts` スクリプト作成
+- 既存44件の記事のうち38件にカテゴリーを自動設定
+- ソース名・言語情報から推測する仕組みを追加
+
+#### フロントエンド実装（Phase 5完了）
+
+**開発方針**: **Tailwind CSS のみ**でシンプルに実装（shadcn/ui等は使わない）
+- コンテンツ（記事）を主役にする
+- 軽量・高速なUIを維持
+- メンテナンス性を重視
+
+**型定義**:
+- `frontend/src/types/article.ts` - Article型
+- `frontend/src/types/api.ts` - APIレスポンス型
+
+**APIクライアント**:
+- `frontend/src/lib/api/articles.ts`
+- `fetchArticles()` - カテゴリーフィルタリング対応
+- `fetchArticleById()` - 記事詳細取得（将来用）
+
+**コンポーネント**:
+- `ArticleCard` - 記事カード表示
+  - カテゴリーバッジ（色分け）
+  - タイトル、説明文、ソース名、日付
+  - レスポンシブ対応（モバイル・タブレット・PC）
+- `TabNavigation` - タブ切り替えUI
+  - トップ、Web開発、システム/インフラ、データ/AI
+
+**トップページ**:
+- `frontend/src/app/page.tsx`
+- タブ切り替えで記事をフィルタリング
+- ローディング状態・エラーハンドリング
+- グリッドレイアウト（1〜3カラム、レスポンシブ）
+
+#### 動作確認
+
+**データ収集**:
+- 9件のRSSソース登録済み
+- 44件の記事収集成功（Python: 40件、JavaScript: 4件）
+- カテゴリー分類: データ/AI = 38件
+
+**API動作確認**:
+```bash
+GET http://localhost:4000/api/articles?category=data&limit=2
+# → 正常に動作、38件の記事を取得可能
+```
+
+**フロントエンド動作確認**:
+- http://localhost:3000 で表示確認完了
+- タブ切り替えで記事フィルタリング動作
+
+#### 設計ドキュメント更新
+
+**docs/design-spec.md**:
+- カテゴリー構成を更新
+- UI設計のタブ構成を変更
+- APIエンドポイントの仕様を修正
+- データモデルに `category` フィールド追加
+
+#### 学んだこと
+
+1. **要件の柔軟な変更**: 実装中でも合理的な変更は躊躇せず実施すべき
+2. **シンプルなUIの価値**: 装飾より機能とコンテンツが重要
+3. **データ移行の重要性**: 既存データへの対応を考慮した設計
+4. **URLベースの分類の限界**: ソース名や言語情報も活用する必要がある
+5. **Docker環境の利点**: 一貫した開発環境でスムーズに動作
+
+#### 今後の課題
+
+**機能面**:
+- 記事詳細ページの実装（SEO対策として必須）
+- Web開発、システム/インフラカテゴリーのRSSソース追加
+- 検索機能、ブックマーク機能
+
+**パフォーマンス**:
+- ページネーション実装（現在は全件取得）
+- 画像の遅延読み込み
+- キャッシュ戦略
+
+**SEO**:
+- 記事ごとのメタタグ最適化
+- OGP設定
+- sitemap.xml生成
+
+#### Git作業
+
+- mainブランチで直接作業
+- コミットメッセージ: `feat: Phase 5完了 - カテゴリー別UI実装とフロントエンド基盤構築`
 
 <!-- 今後の開発メモはここに追記 -->

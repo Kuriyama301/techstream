@@ -1,13 +1,14 @@
 # エンジニア向けニュースアプリ基本設計
 
 ## アプリコンセプト
-**「TechStream」** - プログラミング言語別にキュレーションされたエンジニア向け技術ニュースアプリ
+**「TechStream」** - 技術カテゴリー別にキュレーションされたエンジニア向け技術ニュースアプリ
 
 ## コアバリュー
 - **専門性**: エンジニアに特化した深い技術情報
 - **効率性**: 複数ソースから必要な情報だけを集約
-- **カスタマイズ性**: プログラミング言語別の情報整理
+- **カスタマイズ性**: 技術カテゴリー別の情報整理（Web開発、システム/インフラ、データ/AI等）
 - **実用性**: コードやチュートリアルを見やすく表示
+- **拡張性**: 将来的にデザイン、SaaS等のカテゴリー追加にも対応
 
 ## 詳細要件定義
 
@@ -16,19 +17,20 @@
 #### 必須要件（MVP）
 1. **記事収集・表示システム**
    - 複数のソース（RSS、API等）から記事を自動収集
-   - プログラミング言語別に記事を分類・表示
+   - 技術カテゴリー別に記事を分類・表示
    - 記事の要約表示と全文表示の切り替え
    - コードスニペットのシンタックスハイライト
 
 2. **ユーザー管理**
    - アカウント登録・ログイン機能
-   - ユーザープロファイル（関心のある言語・技術の設定）
+   - ユーザープロファイル（関心のあるカテゴリー・技術の設定）
    - お気に入り・ブックマーク機能
 
 3. **カテゴリ管理**
-   - 言語カテゴリのナビゲーション
-   - サブカテゴリ（フレームワーク、ライブラリ等）の階層構造
+   - 技術カテゴリーのナビゲーション（Web開発、システム/インフラ、データ/AI等）
+   - サブカテゴリ（特定の言語、フレームワーク、ライブラリ等）の階層構造
    - 人気/トレンドカテゴリの表示
+   - 将来的なカテゴリー拡張性（デザイン、SaaS等）
 
 4. **検索・フィルタリング**
    - キーワード検索機能
@@ -98,8 +100,8 @@
 │ TechStream                          👤 🔍 ⚙️    │
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│  トップ  Python  JavaScript  AI  Go  Backend ... │
-│  ━━━━    ─────   ──────────   ──  ──  ───────   │
+│  トップ  Web開発  システム/インフラ  データ/AI   │
+│  ━━━━   ──────  ─────────────  ──────────      │
 │                                                 │
 ├─────────────────────────────────────────────────┤
 │ ┌───────────┐ ┌───────────┐ ┌───────────┐      │
@@ -132,14 +134,20 @@
    - パーソナライズされたレコメンデーション
    - 「今日のハイライト」セクション
 
-2. **言語別タブ**
-   - Python
-   - JavaScript
-   - Go
-   - Rust
-   - Java
-   - C#
-   - PHP
+2. **技術カテゴリータブ**
+   - **Web開発** (`web`)
+     - JavaScript, TypeScript, Node.js, React, Next.js, Vue, Angular
+     - フロントエンド・バックエンド（Web系）全般
+   - **システム/インフラ** (`system`)
+     - Go, Rust, C, C++, システムプログラミング
+     - Docker, Kubernetes, DevOps, インフラ全般
+   - **データ/AI** (`data`)
+     - Python（データサイエンス・機械学習中心）
+     - R, Julia, データ分析, 機械学習, AI全般
+
+3. **将来的な拡張カテゴリー** (Phase 2以降)
+   - **デザイン** (`design`) - UI/UX、グラフィックデザイン、ツール等
+   - **SaaS** (`saas`) - SaaS関連ニュース、ビジネス系
    - その他言語...
 
 3. **技術ドメイン別タブ**
@@ -759,7 +767,8 @@ const ArticleSchema = new Schema({
   
   // 分類情報
   classification: {
-    language: { type: String, index: true },
+    category: { type: String, enum: ['web', 'system', 'data', 'design', 'saas'], index: true },
+    language: { type: String }, // 記事で使用される具体的な言語（JavaScript, Python等）
     domain: { type: String, index: true },
     technicalLevel: { type: String, enum: ['beginner', 'intermediate', 'advanced'] },
     tags: [{ type: String }]
@@ -792,12 +801,12 @@ const ArticleSchema = new Schema({
 });
 
 // インデックス設定
-ArticleSchema.index({ 'classification.language': 1, 'scores.finalScore': -1 });
+ArticleSchema.index({ 'classification.category': 1, 'scores.finalScore': -1 });
 ArticleSchema.index({ 'classification.domain': 1, 'scores.finalScore': -1 });
 ArticleSchema.index({ publishedAt: -1 });
-ArticleSchema.index({ 
-  'classification.language': 1, 
-  'classification.domain': 1, 
+ArticleSchema.index({
+  'classification.category': 1,
+  'classification.domain': 1,
   publishedAt: -1 
 });
 ```
@@ -807,22 +816,22 @@ ArticleSchema.index({
 各タブに対応するAPIエンドポイントを設計します：
 
 ```javascript
-// 言語タブのデータ取得API実装例
-async function getLanguageTabContent(req, res) {
-  const { language } = req.params;
+// カテゴリータブのデータ取得API実装例
+async function getCategoryTabContent(req, res) {
+  const { category } = req.params; // 'web', 'system', 'data' 等
   const { page = 1, limit = 20, level } = req.query;
   const skip = (page - 1) * limit;
-  
+
   // クエリ構築
   const query = {
-    'classification.language': language
+    'classification.category': category
   };
-  
+
   // 難易度フィルター（オプション）
   if (level) {
     query['classification.technicalLevel'] = level;
   }
-  
+
   try {
     // 記事データ取得
     const articles = await Article.find(query)
@@ -830,10 +839,10 @@ async function getLanguageTabContent(req, res) {
       .skip(skip)
       .limit(parseInt(limit))
       .select('-content'); // コンテンツ本文は除外して軽量化
-    
+
     // 総件数取得
     const total = await Article.countDocuments(query);
-    
+
     res.json({
       data: articles,
       pagination: {
@@ -844,7 +853,7 @@ async function getLanguageTabContent(req, res) {
       }
     });
   } catch (error) {
-    console.error(`Error fetching ${language} content:`, error);
+    console.error(`Error fetching ${category} content:`, error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

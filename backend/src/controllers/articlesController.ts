@@ -4,11 +4,12 @@ import mongoose from 'mongoose';
 
 /**
  * 記事一覧を取得
- * GET /api/articles?language=python&page=1&limit=20&sort=-finalScore
+ * GET /api/articles?category=web&language=javascript&page=1&limit=20&sort=-finalScore
  */
 export const getArticles = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
+      category,
       language,
       domain,
       page = '1',
@@ -18,6 +19,10 @@ export const getArticles = async (req: Request, res: Response): Promise<void> =>
 
     // フィルター条件の構築
     const filter: any = {};
+
+    if (category) {
+      filter['classification.category'] = category;
+    }
 
     if (language) {
       filter['classification.language'] = language;

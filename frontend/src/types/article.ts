@@ -1,4 +1,10 @@
-export interface IArticle {
+/**
+ * 記事データの型定義
+ * バックエンドの IArticle と対応
+ */
+export interface Article {
+  _id: string; // MongoDBのID
+
   // 基本情報
   title: string;
   link: string;
@@ -13,9 +19,9 @@ export interface IArticle {
   sourceTier: 1 | 2 | 3;
 
   // 時間情報
-  publishedAt: Date;
-  fetchedAt: Date;
-  updatedAt?: Date;
+  publishedAt: string; // ISO 8601形式の文字列
+  fetchedAt: string;
+  updatedAt?: string;
 
   // 分類情報
   classification: {
@@ -49,6 +55,6 @@ export interface IArticle {
     bookmarks: number;
   };
 
-  // Mongoose timestamps
-  createdAt?: Date;
+  // タイムスタンプ
+  createdAt?: string;
 }

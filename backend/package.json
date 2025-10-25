@@ -11,7 +11,8 @@
     "test:rss": "ts-node src/scripts/testRSSCollector.ts",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "seed:sources": "ts-node src/scripts/seedSources.ts"
+    "seed:sources": "ts-node src/scripts/seedSources.ts",
+    "migrate:categories": "ts-node src/scripts/migrateCategories.ts"
   },
   "keywords": [
     "express",

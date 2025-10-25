@@ -32,7 +32,12 @@ const ArticleSchema = new Schema<IArticle>(
 
     // 分類情報
     classification: {
-      language: { type: String, index: true },
+      category: {
+        type: String,
+        enum: ['web', 'system', 'data', 'design', 'saas'],
+        index: true,
+      },
+      language: { type: String }, // 具体的な言語名
       domain: { type: String, index: true },
       technicalLevel: {
         type: String,
@@ -70,11 +75,11 @@ const ArticleSchema = new Schema<IArticle>(
 );
 
 // 複合インデックス
-ArticleSchema.index({ 'classification.language': 1, 'scores.finalScore': -1 });
+ArticleSchema.index({ 'classification.category': 1, 'scores.finalScore': -1 });
 ArticleSchema.index({ 'classification.domain': 1, 'scores.finalScore': -1 });
 ArticleSchema.index({ publishedAt: -1 });
 ArticleSchema.index({
-  'classification.language': 1,
+  'classification.category': 1,
   'classification.domain': 1,
   publishedAt: -1,
 });

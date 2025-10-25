@@ -45,6 +45,7 @@ export class RSSCollector {
           sourceTier: source.tier,
 
           classification: {
+            category: this.detectCategory(item.link),
             language: this.detectLanguage(item.link),
             tags: [],
           },
@@ -86,7 +87,67 @@ export class RSSCollector {
   }
 
   /**
+   * URLからカテゴリーを検出
+   * Web開発 / システム/インフラ / データ/AI の3分類
+   */
+  private detectCategory(url: string): 'web' | 'system' | 'data' | undefined {
+    const lowerUrl = url.toLowerCase();
+
+    // データ/AI関連のキーワード
+    if (
+      lowerUrl.includes('machine-learning') ||
+      lowerUrl.includes('data-science') ||
+      lowerUrl.includes('ai') ||
+      lowerUrl.includes('ml') ||
+      lowerUrl.includes('deep-learning') ||
+      lowerUrl.includes('pandas') ||
+      lowerUrl.includes('numpy') ||
+      lowerUrl.includes('pytorch') ||
+      lowerUrl.includes('tensorflow')
+    ) {
+      return 'data';
+    }
+
+    // システム/インフラ関連のキーワード
+    if (
+      lowerUrl.includes('rust') ||
+      lowerUrl.includes('golang') ||
+      lowerUrl.includes('go.dev') ||
+      lowerUrl.includes('/go/') ||
+      lowerUrl.includes('docker') ||
+      lowerUrl.includes('kubernetes') ||
+      lowerUrl.includes('devops') ||
+      lowerUrl.includes('system') ||
+      lowerUrl.includes('kernel') ||
+      lowerUrl.includes('embedded')
+    ) {
+      return 'system';
+    }
+
+    // Web開発関連のキーワード（デフォルト）
+    if (
+      lowerUrl.includes('javascript') ||
+      lowerUrl.includes('/js/') ||
+      lowerUrl.includes('typescript') ||
+      lowerUrl.includes('react') ||
+      lowerUrl.includes('vue') ||
+      lowerUrl.includes('angular') ||
+      lowerUrl.includes('next') ||
+      lowerUrl.includes('node') ||
+      lowerUrl.includes('web') ||
+      lowerUrl.includes('frontend') ||
+      lowerUrl.includes('backend')
+    ) {
+      return 'web';
+    }
+
+    // デフォルトはundefined（後でカテゴライズ可能）
+    return undefined;
+  }
+
+  /**
    * URLから言語を検出（簡易版）
+   * 具体的な言語名を記録するために使用
    */
   private detectLanguage(url: string): string | undefined {
     const lowerUrl = url.toLowerCase();
